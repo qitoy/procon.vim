@@ -1,2 +1,4 @@
 # atcoder.vim
-MY vim script for atcoder
+dotfiles/.vim以下に書いていたものを分離するため
+
+めちゃくちゃハードコーディング

@@ -19,6 +19,11 @@ function! atcoder#acc#cd(dir) abort
 	endif
 endfunction
 
+function! atcoder#acc#browse() abort
+  return atcoder#_sh('acc', 'task', '-u')
+    \.then(function('openbrowser#open'))
+endfunction
+
 function! atcoder#acc#test() abort
 	return atcoder#oj#test()
 endfunction

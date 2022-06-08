@@ -7,21 +7,21 @@ endfunction
 function! atcoder#acc#cd(dir) abort
   let dir = s:acc_path . '/' . a:dir . '/'
   if isdirectory(dir) == v:false
-	echoerr 'The directory is not exists!!'
-	return
+    echoerr 'The directory is not exists!!'
+    return
   endif
   execute('edit ' . dir . 'main.cpp')
   execute('lcd ' . dir)
   if isdirectory('test') == v:false
-	call atcoder#_sh('/bin/sh', '-c', 'oj d `acc task -u`')
-	  \.then({-> execute('echomsg "Done!"', '')})
-	  \.catch({-> execute('echomsg "Error!"', '')})
+    call atcoder#_sh('/bin/sh', '-c', 'oj d `acc task -u`')
+      \.then({-> execute('echomsg "Done!"', '')})
+      \.catch({-> execute('echomsg "Error!"', '')})
   endif
 endfunction
 
 function! atcoder#acc#browse() abort
   return atcoder#_sh('acc', 'task', '-u')
-	\.then(function('openbrowser#open'))
+    \.then(function('openbrowser#open'))
 endfunction
 
 function! atcoder#acc#test() abort
@@ -30,12 +30,12 @@ endfunction
 
 function! atcoder#acc#submit(bang) abort
   let promise = a:bang ==# ''
-	\ ? atcoder#acc#test()
-	\.then({-> confirm('Submit?', '&yes\n&No', 0) == 1
-	\ ? atcoder#_Promise.resolve()
-	\ : atcoder#_Promise.reject()})
-	\ : atcoder#_Promise.resolve()
+    \ ? atcoder#acc#test()
+    \.then({-> confirm('Submit?', '&yes\n&No', 0) == 1
+    \ ? atcoder#_Promise.resolve()
+    \ : atcoder#_Promise.reject()})
+    \ : atcoder#_Promise.resolve()
   return promise
-	\.then({-> atcoder#bundle()})
-	\.then({-> atcoder#_sh('acc', 'submit', '-s', '--', '--wait=0', '-y')})
+    \.then({-> atcoder#bundle()})
+    \.then({-> atcoder#_sh('acc', 'submit', '-s', '--', '--wait=0', '-y')})
 endfunction

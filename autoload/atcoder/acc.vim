@@ -1,3 +1,5 @@
+let s:Promise = vital#atcoder#import('Async.Promise')
+
 function! atcoder#acc#prepare(id) abort
   let s:acc_path = getcwd() . '/' . a:id
   call system('acc n --no-tests ' . a:id)
@@ -31,10 +33,10 @@ endfunction
 function! atcoder#acc#submit(bang) abort
   let promise = a:bang ==# ''
     \ ? atcoder#acc#test()
-    \.then({-> confirm('Submit?', '&yes\n&No', 0) == 1
-    \ ? atcoder#_Promise.resolve()
-    \ : atcoder#_Promise.reject()})
-    \ : atcoder#_Promise.resolve()
+    \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
+    \ ? s:Promise.resolve()
+    \ : s:Promise.reject()})
+    \ : s:Promise.resolve()
   return promise
     \.then({-> atcoder#bundle()})
     \.then({-> atcoder#_sh('acc', 'submit', '-s', '--', '--wait=0', '-y')})

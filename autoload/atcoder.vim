@@ -1,10 +1,10 @@
-let atcoder#_Promise = vital#atcoder#new().import('Async.Promise')
+let s:Promise = vital#atcoder#import('Async.Promise')
 
 function! atcoder#make(...) abort
   update
   cexpr ''
   let cmd = ['make'] + a:000
-  return atcoder#_Promise.new({resolve, reject -> job_start(cmd, {
+  return s:Promise.new({resolve, reject -> job_start(cmd, {
     \ 'err_cb': {ch, mes -> execute('caddexpr mes')},
     \ 'exit_cb': {ch, state -> state ? reject() : resolve()},
     \ })})
@@ -15,7 +15,7 @@ function! atcoder#make_then(cmd) abort
 endfunction
 
 function! atcoder#bundle() abort
-  return atcoder#_Promise.new({resolve, reject -> job_start(['/bin/sh', '-c', 'oj-bundle -I ~/AtCoder/C++/library/ main.cpp | sed -e "/#line/d"'], {
+  return s:Promise.new({resolve, reject -> job_start(['/bin/sh', '-c', 'oj-bundle -I ~/AtCoder/C++/library/ main.cpp | sed -e "/#line/d"'], {
     \ 'out_io': 'file',
     \ 'out_name': 'bundle.cpp',
     \ 'exit_cb': {ch, state -> state ? reject() : resolve()},
@@ -31,7 +31,8 @@ function! s:read(chan, part) abort
 endfunction
 
 function! atcoder#_sh(...) abort
-  return atcoder#_Promise.new({resolve, reject -> job_start(a:000, {
+  let cmd = a:000
+  return s:Promise.new({resolve, reject -> job_start(cmd, {
     \ 'drop' : 'never',
     \ 'close_cb' : {ch -> 'do nothing'},
     \ 'exit_cb' : {ch, code ->

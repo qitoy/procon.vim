@@ -22,6 +22,7 @@ function! atcoder#acc#cd(dir) abort
 endfunction
 
 function! atcoder#acc#browse() abort
+  call openbrowser#load()
   return atcoder#_sh('acc', 'task', '-u')
     \.then(function('openbrowser#open'))
 endfunction

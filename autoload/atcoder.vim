@@ -15,11 +15,8 @@ function! atcoder#make_then(cmd) abort
 endfunction
 
 function! atcoder#bundle() abort
-  return s:Promise.new({resolve, reject -> job_start(['/bin/sh', '-c', 'oj-bundle -I ~/AtCoder/C++/library/ main.cpp | sed -e "/#line/d"'], {
-    \ 'out_io': 'file',
-    \ 'out_name': 'bundle.cpp',
-    \ 'exit_cb': {ch, state -> state ? reject() : resolve()},
-    \ })})
+  return atcoder#_sh('/bin/sh', '-c',
+    \ 'oj-bundle -I ~/Library/cpp-library main.cpp | sed -e "/#line/d" > bundle.cpp')
 endfunction
 
 function! s:read(chan, part) abort

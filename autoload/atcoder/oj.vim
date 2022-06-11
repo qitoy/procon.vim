@@ -2,6 +2,7 @@ let s:Promise = vital#atcoder#import('Async.Promise')
 
 function! atcoder#oj#download(url) abort
   lchdir %:h
+  call writefile([a:url], expand('%:h') . '/.submit_url')
   return atcoder#_sh('/bin/sh', '-c', 'rm -rf test/ && oj d ' . a:url)
     \.then({-> execute('echomsg "Done!"', '')})
     \.catch({-> execute('echomsg "Error!"', '')})
@@ -27,5 +28,6 @@ function! atcoder#oj#submit(bang) abort
     \ : s:Promise.resolve()
   return promise
     \.then({-> atcoder#bundle()})
-    \.then({-> atcoder#_sh('oj', 'submit', '--wait=0', '-y', 'bundle.cpp')})
+    \.then({-> atcoder#_sh('oj', 'submit', '--wait=0', '-y',
+    \ readfile(expand('%:h') . '/.submit_url')[0], 'bundle.cpp')})
 endfunction

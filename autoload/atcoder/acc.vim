@@ -2,8 +2,9 @@ let s:Promise = vital#atcoder#import('Async.Promise')
 
 function! atcoder#acc#prepare(id) abort
   let s:acc_path = getcwd() . '/' . a:id
-  call system('acc n --no-tests ' . a:id)
-  execute v:shell_error ? 'echoerr "Error!"' : 'echomsg "Done!"'
+  return atcoder#_sh('acc', 'new', '--no-tests', a:id)
+    \.then({-> execute('echomsg "Done!"', '')})
+    \.catch({-> execute('echoerr "Error!"', '')})
 endfunction
 
 function! atcoder#acc#cd(dir) abort

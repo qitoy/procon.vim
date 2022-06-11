@@ -4,7 +4,7 @@
 function! s:_SID() abort
   return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze__SID$')
 endfunction
-execute join(['function! vital#_atcoder#Async#Later#import() abort', printf("return map({'set_max_workers': '', 'call': '', 'get_max_workers': '', 'set_error_handler': '', 'get_error_handler': ''}, \"vital#_atcoder#function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
+execute join(['function! vital#_procon#Async#Later#import() abort', printf("return map({'set_max_workers': '', 'call': '', 'get_max_workers': '', 'set_error_handler': '', 'get_error_handler': ''}, \"vital#_procon#function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
 delfunction s:_SID
 " ___vital___
 let s:tasks = []

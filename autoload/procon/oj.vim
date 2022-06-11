@@ -1,15 +1,15 @@
-let s:Promise = vital#atcoder#import('Async.Promise')
+let s:Promise = vital#procon#import('Async.Promise')
 
-function! atcoder#oj#download(url) abort
+function! procon#oj#download(url) abort
   lchdir %:h
   call writefile([a:url], expand('%:h') . '/.submit_url')
-  return atcoder#_sh('/bin/sh', '-c', 'rm -rf test/ && oj d ' . a:url)
+  return procon#_sh('/bin/sh', '-c', 'rm -rf test/ && oj d ' . a:url)
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echomsg "Error!"', '')})
 endfunction
 
-function! atcoder#oj#prepare(url) abort
-  call atcoder#_sh('oj-api', 'get-contest', a:url)
+function! procon#oj#prepare(url) abort
+  call procon#_sh('oj-api', 'get-contest', a:url)
   \.then({result -> s:prepare(json_decode(result).result)})
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echomsg "Error!"', '')})
@@ -27,13 +27,13 @@ endfunction
 function! s:lazy_download_test() abort
   let dir = expand('%:h') . '/'
   let url = readfile(dir . 'submit_url')[0]
-  call atcoder#_sh('oj', 'download', url)
+  call procon#_sh('oj', 'download', url)
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echoerr "Error!"', '')})
 endfunction
 
-function! atcoder#oj#test() abort
-  return atcoder#make()
+function! procon#oj#test() abort
+  return procon#make()
   \.then({
   \ -> s:Promise.new({resolve, reject
   \ -> term_start(['oj', 'test', '-N', '-c', './program', '-t', '4'], {
@@ -43,15 +43,15 @@ function! atcoder#oj#test() abort
     \ })})})
 endfunction
 
-function! atcoder#oj#submit(bang) abort
+function! procon#oj#submit(bang) abort
   let promise = a:bang ==# ''
-  \ ? atcoder#oj#test()
+  \ ? procon#oj#test()
   \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
   \ ? s:Promise.resolve()
   \ : s:Promise.reject()})
   \ : s:Promise.resolve()
   return promise
-  \.then({-> atcoder#bundle()})
-  \.then({-> atcoder#_sh('oj', 'submit', '--wait=0', '-y',
+  \.then({-> procon#bundle()})
+  \.then({-> procon#_sh('oj', 'submit', '--wait=0', '-y',
   \ readfile(expand('%:h') . '/.submit_url')[0], 'bundle.cpp')})
 endfunction

@@ -1,13 +1,13 @@
-let s:Promise = vital#atcoder#import('Async.Promise')
+let s:Promise = vital#procon#import('Async.Promise')
 
-function! atcoder#acc#prepare(id) abort
+function! procon#acc#prepare(id) abort
   let s:acc_path = getcwd() . '/' . a:id
-  return atcoder#_sh('acc', 'new', '--no-tests', a:id)
+  return procon#_sh('acc', 'new', '--no-tests', a:id)
     \.then({-> execute('echomsg "Done!"', '')})
     \.catch({-> execute('echoerr "Error!"', '')})
 endfunction
 
-function! atcoder#acc#cd(dir) abort
+function! procon#acc#cd(dir) abort
   let dir = s:acc_path . '/' . a:dir . '/'
   if isdirectory(dir) == v:false
     echoerr 'The directory is not exists!!'
@@ -16,30 +16,30 @@ function! atcoder#acc#cd(dir) abort
   execute('edit ' . dir . 'main.cpp')
   execute('lcd ' . dir)
   if isdirectory('test') == v:false
-    call atcoder#_sh('/bin/sh', '-c', 'oj d `acc task -u`')
+    call procon#_sh('/bin/sh', '-c', 'oj d `acc task -u`')
       \.then({-> execute('echomsg "Done!"', '')})
       \.catch({-> execute('echomsg "Error!"', '')})
   endif
 endfunction
 
-function! atcoder#acc#browse() abort
+function! procon#acc#browse() abort
   call openbrowser#load()
-  return atcoder#_sh('acc', 'task', '-u')
+  return procon#_sh('acc', 'task', '-u')
     \.then(function('openbrowser#open'))
 endfunction
 
-function! atcoder#acc#test() abort
-  return atcoder#oj#test()
+function! procon#acc#test() abort
+  return procon#oj#test()
 endfunction
 
-function! atcoder#acc#submit(bang) abort
+function! procon#acc#submit(bang) abort
   let promise = a:bang ==# ''
-    \ ? atcoder#acc#test()
+    \ ? procon#acc#test()
     \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
     \ ? s:Promise.resolve()
     \ : s:Promise.reject()})
     \ : s:Promise.resolve()
   return promise
-    \.then({-> atcoder#bundle()})
-    \.then({-> atcoder#_sh('acc', 'submit', '-s', '--', '--wait=0', '-y')})
+    \.then({-> procon#bundle()})
+    \.then({-> procon#_sh('acc', 'submit', '-s', '--', '--wait=0', '-y')})
 endfunction

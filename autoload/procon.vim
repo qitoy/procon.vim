@@ -1,6 +1,6 @@
-let s:Promise = vital#atcoder#import('Async.Promise')
+let s:Promise = vital#procon#import('Async.Promise')
 
-function! atcoder#make(...) abort
+function! procon#make(...) abort
   update
   cexpr ''
   let cmd = ['make'] + a:000
@@ -10,12 +10,12 @@ function! atcoder#make(...) abort
     \ })})
 endfunction
 
-function! atcoder#make_then(cmd) abort
-  return atcoder#make().then({-> execute(a:cmd)})
+function! procon#make_then(cmd) abort
+  return procon#make().then({-> execute(a:cmd)})
 endfunction
 
-function! atcoder#bundle() abort
-  return atcoder#_sh('/bin/sh', '-c',
+function! procon#bundle() abort
+  return procon#_sh('/bin/sh', '-c',
     \ 'oj-bundle -I ~/Library/cpp-library main.cpp | sed -e "/#line/d" > bundle.cpp')
 endfunction
 
@@ -27,7 +27,7 @@ function! s:read(chan, part) abort
   return join(out, '\n')
 endfunction
 
-function! atcoder#_sh(...) abort
+function! procon#_sh(...) abort
   let cmd = a:000
   return s:Promise.new({resolve, reject -> job_start(cmd, {
     \ 'drop' : 'never',

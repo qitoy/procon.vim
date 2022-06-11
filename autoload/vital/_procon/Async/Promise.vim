@@ -4,7 +4,7 @@
 function! s:_SID() abort
   return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze__SID$')
 endfunction
-execute join(['function! vital#_atcoder#Async#Promise#import() abort', printf("return map({'resolve': '', '_vital_depends': '', 'race': '', 'wait': '', '_vital_created': '', 'all': '', 'noop': '', 'on_unhandled_rejection': '', 'is_promise': '', 'chain': '', 'is_available': '', 'reject': '', 'new': '', '_vital_loaded': ''}, \"vital#_atcoder#function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
+execute join(['function! vital#_procon#Async#Promise#import() abort', printf("return map({'resolve': '', '_vital_depends': '', 'race': '', 'wait': '', '_vital_created': '', 'all': '', 'noop': '', 'on_unhandled_rejection': '', 'is_promise': '', 'chain': '', 'is_available': '', 'reject': '', 'new': '', '_vital_loaded': ''}, \"vital#_procon#function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
 delfunction s:_SID
 " ___vital___
 " ECMAScript like Promise library for asynchronous operations.

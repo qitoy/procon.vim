@@ -1,11 +1,11 @@
 command! -nargs=1 OjDownload
-  \ call procon#oj#download(<q-args>)
+  \ call procon#download(<q-args>)
 
 command! OjTest
-  \ call procon#oj#test()
+  \ call procon#test()
 
 command! -bang OjSubmit
-  \ call procon#oj#submit(<q-bang>)
+  \ call procon#submit(<q-bang>)
 
 command! -nargs=1 AccPrepare
   \ call procon#acc#prepare(<q-args>)

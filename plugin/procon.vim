@@ -1,3 +1,7 @@
+augroup procon
+  autocmd!
+augroup END
+
 command! -nargs=1 OjDownload
   \ call procon#download(<q-args>)
 

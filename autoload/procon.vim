@@ -1,8 +1,9 @@
 let s:Promise = vital#procon#import('Async.Promise')
+let s:File = vital#procon#import('System.File')
 
 function! procon#download(url) abort
   lchdir %:h
-  call writefile([a:url], expand('%:h') . '/.submit_url')
+  call writefile([a:url], expand('%:p:h') . '/.submit_url')
   return procon#utils#_sh('/bin/sh', '-c', 'rm -rf test/ && oj d ' . a:url)
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echomsg "Error!"', '')})
@@ -16,20 +17,30 @@ function! procon#prepare(url) abort
 endfunction
 
 function! s:prepare(result) abort
-  let contest_dir = expand('%:h') . '/' . a:result.name . '/'
+  let contest_dir = expand('%:p:h') . '/' . a:result.name . '/'
   for problem in a:result.problems
     let problem_dir = contest_dir . problem.context.alphabet . '/'
     call mkdir(problem_dir, 'p')
     call writefile([problem.url], problem_dir . '.submit_url')
+    call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/main.cpp', problem_dir . 'main.cpp')
+    call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/Makefile', problem_dir . 'Makefile')
+    execute 'autocmd procon BufEnter' substitute(problem_dir, ' ', '\\ ', 'g') . 'main.cpp' '++once' 'call s:lazy_download_test()'
   endfor
 endfunction
 
 function! s:lazy_download_test() abort
-  let dir = expand('%:h') . '/'
-  let url = readfile(dir . 'submit_url')[0]
+  lchdir %:h
+  let dir = expand('%:p:h') . '/'
+  let url = readfile(dir . '.submit_url')[0]
   call procon#utils#_sh('oj', 'download', url)
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echoerr "Error!"', '')})
+endfunction
+
+function! procon#browse() abort
+  call openbrowser#load()
+  let url = readfile(expand('%:p:h') . '/.submit_url')[0]
+  call openbrowser#open(url)
 endfunction
 
 function! procon#test() abort
@@ -53,5 +64,5 @@ function! procon#submit(bang) abort
   return promise
   \.then({-> procon#utils#bundle()})
   \.then({-> procon#utils#_sh('oj', 'submit', '--wait=0', '-y',
-  \ readfile(expand('%:h') . '/.submit_url')[0], 'bundle.cpp')})
+  \ readfile(expand('%:p:h') . '/.submit_url')[0], 'bundle.cpp')})
 endfunction

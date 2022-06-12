@@ -10,17 +10,17 @@ function! procon#download(url) abort
     call writefile([url], dir . '.submit_url')
   endif
   let test_dir = dir . 'test/'
-  return procon#utils#_sh('/bin/sh', '-c',
-  \ printf('rm -rf %s && oj download -d %s %s', test_dir, test_dir, url))
+  return procon#utils#_sh('rm', '-rf', test_dir)
+  \.then({-> procon#utils#_sh('oj', 'download', '-d', test_dir, url)})
   \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({-> execute('echomsg "Error!"', '')})
+  \.catch({mes -> execute('echoerr mes', '')})
 endfunction
 
 function! procon#prepare(url) abort
   call procon#utils#_sh('oj-api', 'get-contest', a:url)
   \.then({result -> s:prepare(json_decode(result).result)})
   \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({-> execute('echomsg "Error!"', '')})
+  \.catch({mes -> execute('echoerr mes', '')})
 endfunction
 
 function! s:prepare(result) abort
@@ -31,16 +31,9 @@ function! s:prepare(result) abort
     call writefile([problem.url], problem_dir . '.submit_url')
     call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/main.cpp', problem_dir . 'main.cpp')
     call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/Makefile', problem_dir . 'Makefile')
-    execute 'autocmd procon BufEnter' substitute(problem_dir, ' ', '\\ ', 'g') . 'main.cpp' '++once' 'call s:lazy_download_test()'
+    execute 'autocmd procon BufEnter' substitute(problem_dir, ' ', '\\ ', 'g') . 'main.cpp'
+    \ '++once' 'call procon#download("")'
   endfor
-endfunction
-
-function! s:lazy_download_test() abort
-  let dir = expand('%:p:h') . '/'
-  let url = readfile(dir . '.submit_url')[0]
-  call procon#utils#_sh('oj', 'download', '-d', dir . 'test', url)
-  \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({-> execute('echoerr "Error!"', '')})
 endfunction
 
 function! procon#browse() abort

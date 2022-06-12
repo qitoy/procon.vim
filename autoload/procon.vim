@@ -4,10 +4,10 @@ let s:File = vital#procon#import('System.File')
 function! procon#download(url) abort
   let dir = expand('%:p:h') . '/'
   if a:url ==# ''
-    let url = readfile(dir . '.submit_url')[0]
+    let url = readfile(dir . '.contest_url')[0]
   else
     let url = a:url
-    call writefile([url], dir . '.submit_url')
+    call writefile([url], dir . '.contest_url')
   endif
   let test_dir = dir . 'test/'
   return procon#utils#_sh('rm', '-rf', test_dir)
@@ -28,7 +28,7 @@ function! s:prepare(result) abort
   for problem in a:result.problems
     let problem_dir = contest_dir . problem.context.alphabet . '/'
     call mkdir(problem_dir, 'p')
-    call writefile([problem.url], problem_dir . '.submit_url')
+    call writefile([problem.url], problem_dir . '.contest_url')
     call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/main.cpp', problem_dir . 'main.cpp')
     call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/Makefile', problem_dir . 'Makefile')
     execute 'autocmd procon BufEnter' substitute(problem_dir, ' ', '\\ ', 'g') . 'main.cpp'
@@ -38,7 +38,7 @@ endfunction
 
 function! procon#browse() abort
   call openbrowser#load()
-  let url = readfile(expand('%:p:h') . '/.submit_url')[0]
+  let url = readfile(expand('%:p:h') . '/.contest_url')[0]
   call openbrowser#open(url)
 endfunction
 
@@ -63,5 +63,5 @@ function! procon#submit(bang) abort
   return promise
   \.then({-> procon#utils#bundle()})
   \.then({-> procon#utils#_sh('oj', 'submit', '--wait=0', '-y',
-  \ readfile(expand('%:p:h') . '/.submit_url')[0], 'bundle.cpp')})
+  \ readfile(expand('%:p:h') . '/.contest_url')[0], 'bundle.cpp')})
 endfunction

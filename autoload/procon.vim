@@ -2,9 +2,16 @@ let s:Promise = vital#procon#import('Async.Promise')
 let s:File = vital#procon#import('System.File')
 
 function! procon#download(url) abort
-  lchdir %:h
-  call writefile([a:url], expand('%:p:h') . '/.submit_url')
-  return procon#utils#_sh('/bin/sh', '-c', 'rm -rf test/ && oj d ' . a:url)
+  let dir = expand('%:p:h') . '/'
+  if a:url ==# ''
+    let url = readfile(dir . '.submit_url')[0]
+  else
+    let url = a:url
+    call writefile([url], dir . '.submit_url')
+  endif
+  let test_dir = dir . 'test/'
+  return procon#utils#_sh('/bin/sh', '-c',
+  \ printf('rm -rf %s && oj download -d %s %s', test_dir, test_dir, url))
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echomsg "Error!"', '')})
 endfunction
@@ -29,10 +36,9 @@ function! s:prepare(result) abort
 endfunction
 
 function! s:lazy_download_test() abort
-  lchdir %:h
   let dir = expand('%:p:h') . '/'
   let url = readfile(dir . '.submit_url')[0]
-  call procon#utils#_sh('oj', 'download', url)
+  call procon#utils#_sh('oj', 'download', '-d', dir . 'test', url)
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({-> execute('echoerr "Error!"', '')})
 endfunction

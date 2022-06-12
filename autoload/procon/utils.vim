@@ -2,6 +2,7 @@ let s:Promise = vital#procon#import('Async.Promise')
 
 function! procon#utils#make(...) abort
   update
+  lcd %:p:h
   cexpr ''
   let cmd = ['make'] + a:000
   return s:Promise.new({resolve, reject -> job_start(cmd, {

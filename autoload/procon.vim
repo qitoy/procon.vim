@@ -54,6 +54,7 @@ function! procon#test() abort
 endfunction
 
 function! procon#submit(bang) abort
+  update
   let promise = a:bang ==# ''
   \ ? procon#test()
   \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
@@ -62,6 +63,20 @@ function! procon#submit(bang) abort
   \ : s:Promise.resolve()
   return promise
   \.then({-> procon#utils#bundle()})
-  \.then({-> procon#utils#_sh('oj', 'submit', '--wait=0', '-y',
-  \ readfile(expand('%:p:h') . '/.contest_url')[0], 'bundle.cpp')})
+  \.then({-> readfile(expand('%:p:h') . '/.contest_url')[0]})
+  \.then(function('s:submit_or_browse'))
+  \.catch({mes -> execute('echoerr mes', '')})
+endfunction
+
+function! s:submit_or_browse(url) abort
+  if a:url =~# 'codeforces'
+    call openbrowser#open(substitute(a:url, 'problem', 'submit', ''))
+    execute 'edit' expand('%:p:h') . '/bundle.cpp'
+    %y+
+    execute 'normal' "\<C-^>"
+    echomsg 'Yank bundle.cpp'
+    return s:Promise.resolve()
+  else
+    return procon#utils#_sh('oj', 'submit', '--wait=0', '-y', a:url, 'bundle.cpp')
+  endif
 endfunction

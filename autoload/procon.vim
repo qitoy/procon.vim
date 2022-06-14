@@ -24,14 +24,14 @@ function! procon#prepare(url) abort
 endfunction
 
 function! s:prepare(result) abort
-  let contest_dir = expand('%:p:h') . '/' . a:result.name . '/'
+  let contest_dir = expand('%:p:h') . '/' . substitute(a:result.name, ' ', '', 'g') . '/'
   for problem in a:result.problems
     let problem_dir = contest_dir . problem.context.alphabet . '/'
     call mkdir(problem_dir, 'p')
     call writefile([problem.url], problem_dir . '.contest_url')
-    call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/main.cpp', problem_dir . 'main.cpp')
-    call s:File.copy(expand('~') . '/Library/Preferences/atcoder-cli-nodejs/cpp/Makefile', problem_dir . 'Makefile')
-    execute 'autocmd procon BufEnter' substitute(problem_dir, ' ', '\\ ', 'g') . 'main.cpp'
+    call s:File.copy(expand('~') . '/Library/Preferences/procon/cpp/main.cpp', problem_dir . 'main.cpp')
+    call s:File.copy(expand('~') . '/Library/Preferences/procon/cpp/Makefile', problem_dir . 'Makefile')
+    execute 'autocmd procon BufEnter' problem_dir . 'main.cpp'
     \ '++once' 'call procon#download("")'
   endfor
 endfunction
@@ -43,14 +43,14 @@ function! procon#browse() abort
 endfunction
 
 function! procon#test() abort
-  return procon#utils#make()
-  \.then({
-  \ -> s:Promise.new({resolve, reject
-  \ -> term_start(['oj', 'test', '-N', '-c', './program', '-t', '4'], {
+  lcd %:p:h
+  update
+  return s:Promise.new({resolve, reject
+  \ -> term_start(['make', 'test'], {
     \ 'term_name': 'oj-test',
     \ 'term_rows': 20,
     \ 'exit_cb': {ch, state -> state ? reject() : resolve()},
-    \ })})})
+    \ })})
 endfunction
 
 function! procon#submit(bang) abort
@@ -62,21 +62,7 @@ function! procon#submit(bang) abort
   \ : s:Promise.reject()})
   \ : s:Promise.resolve()
   return promise
-  \.then({-> procon#utils#bundle()})
   \.then({-> readfile(expand('%:p:h') . '/.contest_url')[0]})
-  \.then(function('s:submit_or_browse'))
+  \.then({url -> procon#utils#_sh('make', 'submit', 'URL=' . url)})
   \.catch({mes -> execute('echoerr mes', '')})
-endfunction
-
-function! s:submit_or_browse(url) abort
-  if a:url =~# 'codeforces'
-    call openbrowser#open(substitute(a:url, 'problem', 'submit', ''))
-    execute 'edit' expand('%:p:h') . '/bundle.cpp'
-    %y+
-    execute 'normal' "\<C-^>"
-    echomsg 'Yank bundle.cpp'
-    return s:Promise.resolve()
-  else
-    return procon#utils#_sh('oj', 'submit', '--wait=0', '-y', a:url, 'bundle.cpp')
-  endif
 endfunction

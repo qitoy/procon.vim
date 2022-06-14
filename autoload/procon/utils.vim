@@ -15,11 +15,6 @@ function! procon#utils#make_then(cmd) abort
   return procon#utils#make().then({-> execute(a:cmd)})
 endfunction
 
-function! procon#utils#bundle() abort
-  return procon#utils#_sh('/bin/sh', '-c',
-    \ 'oj-bundle -I ~/Library/cpp-library main.cpp | sed -e "/#line/d" > bundle.cpp')
-endfunction
-
 function! s:read(chan, part) abort
   let out = []
   while ch_status(a:chan, {'part' : a:part}) =~# 'open\|buffered'

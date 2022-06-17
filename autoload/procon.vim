@@ -63,7 +63,7 @@ function! procon#submit(bang) abort
   \ : s:Promise.reject()})
   \ : s:Promise.resolve()
   return promise
-  \.then({-> readfile(expand('%:p:h') . '/.contest_url')[0]})
+  \.then({-> readfile(cwd . '/.contest_url')[0]})
   \.then({url -> procon#utils#_sh('make', '-C', cwd, 'submit', 'URL=' . url)})
   \.catch({mes -> execute('echoerr mes', '')})
 endfunction

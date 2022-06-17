@@ -43,10 +43,10 @@ function! procon#browse() abort
 endfunction
 
 function! procon#test() abort
-  lcd %:p:h
   update
   return s:Promise.new({resolve, reject
   \ -> term_start(['make', 'test'], {
+    \ 'cwd': expand('%:p:h'),
     \ 'term_name': 'oj-test',
     \ 'term_rows': 20,
     \ 'exit_cb': {ch, state -> state ? reject() : resolve()},
@@ -55,6 +55,7 @@ endfunction
 
 function! procon#submit(bang) abort
   update
+  let cwd = expand('%:p:h')
   let promise = a:bang ==# ''
   \ ? procon#test()
   \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
@@ -63,6 +64,6 @@ function! procon#submit(bang) abort
   \ : s:Promise.resolve()
   return promise
   \.then({-> readfile(expand('%:p:h') . '/.contest_url')[0]})
-  \.then({url -> procon#utils#_sh('make', 'submit', 'URL=' . url)})
+  \.then({url -> procon#utils#_sh('make', '-C', cwd, 'submit', 'URL=' . url)})
   \.catch({mes -> execute('echoerr mes', '')})
 endfunction

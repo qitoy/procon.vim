@@ -6,7 +6,7 @@ function! procon#utils#make(...) abort
   cexpr ''
   let cmd = ['make'] + a:000
   return s:Promise.new({resolve, reject -> job_start(cmd, {
-    \ 'err_cb': {ch, mes -> execute('caddexpr mes')},
+    \ 'callback': {ch, mes -> execute('caddexpr mes')},
     \ 'exit_cb': {ch, state -> state ? reject() : resolve()},
     \ })})
 endfunction
@@ -26,10 +26,10 @@ endfunction
 function! procon#utils#_sh(...) abort
   let cmd = a:000
   return s:Promise.new({resolve, reject -> job_start(cmd, {
-    \ 'drop' : 'never',
-    \ 'close_cb' : {ch -> 'do nothing'},
-    \ 'exit_cb' : {ch, code ->
-    \ code ? reject(s:read(ch, 'err')) : resolve(s:read(ch, 'out'))
-    \ },
-    \ })})
+  \ 'drop' : 'never',
+  \ 'close_cb' : {ch -> 'do nothing'},
+  \ 'exit_cb' : {ch, code ->
+  \   code ? reject(s:read(ch, 'err')) : resolve(s:read(ch, 'out'))
+  \ },
+  \})})
 endfunction

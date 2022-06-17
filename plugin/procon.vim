@@ -2,32 +2,17 @@ augroup procon
   autocmd!
 augroup END
 
-command! -nargs=? OjDownload
+command! -nargs=? ProconDownload
 \ call procon#download(<q-args>)
 
-command! -nargs=1 OjPrepare
+command! -nargs=1 ProconPrepare
 \ call procon#prepare(<q-args>)
 
-command! OjBrowse
+command! ProconBrowse
 \ call procon#browse()
 
-command! OjTest
+command! ProconTest
 \ call procon#test()
 
-command! -bang OjSubmit
+command! -bang ProconSubmit
 \ call procon#submit(<q-bang>)
-
-command! -nargs=1 AccPrepare
-\ call procon#acc#prepare(<q-args>)
-
-command! -nargs=1 AccCd
-\ call procon#acc#cd(<q-args>)
-
-command! AccBrowse
-\ call procon#acc#browse()
-
-command! AccTest
-\ call procon#acc#test()
-
-command! -bang AccSubmit
-\ call procon#acc#submit(<q-bang>)

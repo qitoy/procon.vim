@@ -1,5 +1,4 @@
 let s:Promise = vital#procon#import('Async.Promise')
-let s:File = vital#procon#import('System.File')
 
 function! procon#download(url) abort
   let dir = expand('%:p:h') . '/'
@@ -16,24 +15,29 @@ function! procon#download(url) abort
   \.catch({mes -> execute('echoerr mes', '')})
 endfunction
 
-function! procon#prepare(url) abort
+function! procon#prepare(url, ...) abort
+  let defaultlang = get(g:, 'procon#defaultlang', 'cpp')
+  let lang = get(a:000, 0, defaultlang)
   call procon#utils#_sh('oj-api', 'get-contest', a:url)
-  \.then({result -> s:prepare(json_decode(result).result)})
+  \.then({result -> s:prepare(json_decode(result).result, lang)})
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({mes -> execute('echoerr mes', '')})
 endfunction
 
-function! s:prepare(result) abort
+function! s:prepare(result, lang) abort
+  let preference = get(g:, 'procon#preference', expand('~/Library/Preferences/procon/'))
   let contest_dir = expand('%:p:h') . '/' . substitute(a:result.name, ' ', '', 'g') . '/'
+  let ps = []
   for problem in a:result.problems
     let problem_dir = contest_dir . problem.context.alphabet . '/'
     call mkdir(problem_dir, 'p')
     call writefile([problem.url], problem_dir . '.contest_url')
-    call s:File.copy(expand('~') . '/Library/Preferences/procon/cpp/main.cpp', problem_dir . 'main.cpp')
-    call s:File.copy(expand('~') . '/Library/Preferences/procon/cpp/Makefile', problem_dir . 'Makefile')
-    execute 'autocmd procon BufEnter' problem_dir . 'main.cpp'
+    call add(ps,
+    \ procon#utils#_sh('/bin/bash', '-c', 'cp ' . preference . a:lang . '/* ' . problem_dir))
+    execute 'autocmd procon BufEnter' problem_dir . '*'
     \ '++once' 'call procon#download("")'
   endfor
+  return s:Promise.all(ps)
 endfunction
 
 function! procon#browse() abort

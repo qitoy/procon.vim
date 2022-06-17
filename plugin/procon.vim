@@ -5,8 +5,8 @@ augroup END
 command! -nargs=? ProconDownload
 \ call procon#download(<q-args>)
 
-command! -nargs=1 ProconPrepare
-\ call procon#prepare(<q-args>)
+command! -nargs=+ ProconPrepare
+\ call procon#prepare(<f-args>)
 
 command! ProconBrowse
 \ call procon#browse()

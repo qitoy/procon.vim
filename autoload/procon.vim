@@ -25,7 +25,7 @@ function! procon#prepare(url, ...) abort
 endfunction
 
 function! s:prepare(result, lang) abort
-  let preference = get(g:, 'procon#preference', expand('~/Library/Preferences/procon/'))
+  let preference = get(g:, 'procon#preference', expand('~/.procon/'))
   let contest_dir = expand('%:p:h') . '/' . substitute(a:result.url, '^.*/', '', '') . '/'
   let ps = []
   for problem in a:result.problems

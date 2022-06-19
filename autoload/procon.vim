@@ -12,7 +12,7 @@ function! procon#download(url) abort
   return procon#utils#_sh('rm', '-rf', test_dir)
   \.then({-> procon#utils#_sh('oj', 'download', '-d', test_dir, url)})
   \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({mes -> execute('echoerr mes', '')})
+  \.catch({mes -> execute('echomsg mes', '')})
 endfunction
 
 function! procon#prepare(url, ...) abort
@@ -21,7 +21,7 @@ function! procon#prepare(url, ...) abort
   call procon#utils#_sh('oj-api', 'get-contest', a:url)
   \.then({result -> s:prepare(json_decode(result).result, lang)})
   \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({mes -> execute('echoerr mes', '')})
+  \.catch({mes -> execute('echomsg mes', '')})
 endfunction
 
 function! s:prepare(result, lang) abort
@@ -69,5 +69,5 @@ function! procon#submit(bang) abort
   return promise
   \.then({-> readfile(cwd . '/.contest_url')[0]})
   \.then({url -> procon#utils#_sh('make', '-C', cwd, 'submit', 'URL=' . url)})
-  \.catch({mes -> execute('echoerr mes', '')})
+  \.catch({mes -> execute('echomsg mes', '')})
 endfunction

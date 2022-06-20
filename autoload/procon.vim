@@ -2,23 +2,28 @@ let s:Promise = vital#procon#import('Async.Promise')
 
 function! procon#download(url) abort
   let dir = expand('%:p:h') . '/'
+  let test_dir = dir . 'test/'
   if a:url ==# ''
+    if !filereadable(dir . '.contest_url') || isdirectory(test_dir)
+      return s:Promise.reject()
+    endif
     let url = readfile(dir . '.contest_url')[0]
+    let promise = s:Promise.resolve()
   else
     let url = a:url
     call writefile([url], dir . '.contest_url')
+    let promise = procon#utils#_sh('rm', '-rf', test_dir)
   endif
-  let test_dir = dir . 'test/'
-  return procon#utils#_sh('rm', '-rf', test_dir)
+  return promise
   \.then({-> procon#utils#_sh('oj', 'download', '-d', test_dir, url)})
   \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({mes -> execute('echomsg mes', '')})
+  \.catch({mes -> [execute('echomsg mes', ''), mkdir(test_dir, 'p')]})
 endfunction
 
 function! procon#prepare(url, ...) abort
   let defaultlang = get(g:, 'procon#defaultlang', 'cpp')
   let lang = get(a:000, 0, defaultlang)
-  call procon#utils#_sh('oj-api', 'get-contest', a:url)
+  return procon#utils#_sh('oj-api', 'get-contest', a:url)
   \.then({result -> s:prepare(json_decode(result).result, lang)})
   \.then({-> execute('echomsg "Done!"', '')})
   \.catch({mes -> execute('echomsg mes', '')})
@@ -26,17 +31,16 @@ endfunction
 
 function! s:prepare(result, lang) abort
   let preference = get(g:, 'procon#preference', expand('~/.procon/'))
-  let url_list = split(a:result.url, '/')
-  let contest_dir = expand('%:p:h') . '/' . url_list[2] . '/' . url_list[-1] . '/'
+  let contest_dir = expand('%:p:h') . '/' . a:result.name . '/'
   let ps = []
   for problem in a:result.problems
     let problem_dir = contest_dir . problem.context.alphabet . '/'
     call mkdir(problem_dir, 'p')
     call writefile([problem.url], problem_dir . '.contest_url')
     call add(ps,
-    \ procon#utils#_sh('/bin/bash', '-c', 'cp ' . preference . a:lang . '/* ' . problem_dir))
-    execute 'autocmd procon BufEnter' problem_dir . '*'
-    \ '++once' 'call procon#download("")'
+    \ procon#utils#_sh('/bin/bash', '-c',
+    \ 'cp ' . preference . a:lang . '/* ' . fnamemodify(problem_dir, ':S')
+    \))
   endfor
   return s:Promise.all(ps)
 endfunction

@@ -1,16 +1,16 @@
 let s:Promise = vital#procon#import('Async.Promise')
 
-function! procon#download(url) abort
+function! procon#download(...) abort
   let dir = expand('%:p:h') . '/'
   let test_dir = dir . 'test/'
-  if a:url ==# ''
+  if a:0 == 0
     if !filereadable(dir . '.contest_url') || isdirectory(test_dir)
       return s:Promise.reject()
     endif
     let url = readfile(dir . '.contest_url')[0]
     let promise = s:Promise.resolve()
   else
-    let url = a:url
+    let url = a:1
     call writefile([url], dir . '.contest_url')
     let promise = procon#_sh('rm', '-rf', test_dir)
   endif
@@ -62,15 +62,16 @@ function! procon#test() abort
     \ })})
 endfunction
 
-function! procon#submit(bang) abort
+function! procon#submit(...) abort
   update
   let cwd = expand('%:p:h')
-  let promise = a:bang ==# ''
-  \ ? procon#test()
-  \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
-  \ ? s:Promise.resolve()
-  \ : s:Promise.reject()})
-  \ : s:Promise.resolve()
+  if get(a:, 1, 0)
+    let promise = s:Promise.resolve()
+  else
+    let promise = procon#test()
+    \.then({-> confirm('Submit?', "&yes\n&No", 0) == 1
+    \ ? s:Promise.resolve() : s:Promise.reject()})
+  endif
   return promise
   \.then({-> readfile(cwd . '/.contest_url')[0]})
   \.then({url -> procon#_sh('make', '-C', cwd, 'submit', 'URL=' . url)})

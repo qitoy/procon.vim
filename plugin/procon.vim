@@ -1,10 +1,10 @@
 augroup procon
   autocmd!
-  autocmd BufEnter * call procon#download('')
+  autocmd BufEnter * call procon#download()
 augroup END
 
 command! -nargs=? ProconDownload
-\ call procon#download(<q-args>)
+\ call procon#download(<f-args>)
 
 command! -nargs=+ ProconPrepare
 \ call procon#prepare(<f-args>)
@@ -16,4 +16,4 @@ command! ProconTest
 \ call procon#test()
 
 command! -bang ProconSubmit
-\ call procon#submit(<q-bang>)
+\ call procon#submit(<q-bang> ==# '!')

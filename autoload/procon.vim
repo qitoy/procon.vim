@@ -1,5 +1,8 @@
 let s:Promise = vital#procon#import('Async.Promise')
 
+let g:procon_default_lang = get(g:, 'procon_default_lang', 'cpp')
+let g:procon_preference = get(g:, 'procon_preference', expand('~/.procon/'))
+
 function! procon#download(...) abort
   let dir = expand('%:p:h') . '/'
   let test_dir = dir . 'test/'
@@ -21,8 +24,7 @@ function! procon#download(...) abort
 endfunction
 
 function! procon#prepare(url, ...) abort
-  let defaultlang = get(g:, 'procon#defaultlang', 'cpp')
-  let lang = get(a:000, 0, defaultlang)
+  let lang = get(a:, 1, g:procon_default_lang)
   return procon#_sh('oj-api', 'get-contest', a:url)
   \.then({result -> s:prepare(json_decode(result).result, lang)})
   \.then({-> execute('echomsg "Done!"', '')})
@@ -30,7 +32,6 @@ function! procon#prepare(url, ...) abort
 endfunction
 
 function! s:prepare(result, lang) abort
-  let preference = get(g:, 'procon#preference', expand('~/.procon/'))
   let contest_dir = expand('%:p:h') . '/' . a:result.name . '/'
   let ps = []
   for problem in a:result.problems
@@ -39,7 +40,7 @@ function! s:prepare(result, lang) abort
     call writefile([problem.url], problem_dir . '.contest_url')
     call add(ps,
     \ procon#_sh('/bin/bash', '-c',
-    \ 'cp ' . preference . a:lang . '/* ' . fnamemodify(problem_dir, ':S')
+    \ 'cp ' . g:procon_preference . a:lang . '/* ' . fnamemodify(problem_dir, ':S')
     \))
   endfor
   return s:Promise.all(ps)

@@ -17,3 +17,6 @@ command! ProconTest
 
 command! -bang ProconSubmit
 \ call procon#submit(<q-bang> ==# '!')
+
+command! -nargs=+ -complete=customlist,procon#commands#complete Procon
+\ call procon#commands#call(<f-args>)

@@ -1,5 +1,6 @@
 let s:Promise = vital#procon#import('Async.Promise')
 
+let g:procon_debug = get(g:, 'procon_debug', v:false)
 let g:procon_default_lang = get(g:, 'procon_default_lang', 'cpp')
 let g:procon_preference = get(g:, 'procon_preference', expand('~/.procon/'))
 
@@ -19,16 +20,16 @@ function! procon#download(...) abort
   endif
   return promise
   \.then({-> procon#_sh('oj', 'download', '-d', test_dir, url)})
-  \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({mes -> [execute('echomsg mes', ''), mkdir(test_dir, 'p')]})
+  \.then({-> s:echomsg('msg', 'Done!')})
+  \.catch({mes -> s:echomsg('err', mes)})
 endfunction
 
 function! procon#prepare(url, ...) abort
   let lang = get(a:, 1, g:procon_default_lang)
   return procon#_sh('oj-api', 'get-contest', a:url)
   \.then({result -> s:prepare(json_decode(result).result, lang)})
-  \.then({-> execute('echomsg "Done!"', '')})
-  \.catch({mes -> execute('echomsg mes', '')})
+  \.then({-> s:echomsg('msg', 'Done!')})
+  \.catch({mes -> s:echomsg('err', mes)})
 endfunction
 
 function! s:prepare(result, lang) abort
@@ -76,7 +77,15 @@ function! procon#submit(...) abort
   return promise
   \.then({-> readfile(cwd . '/.contest_url')[0]})
   \.then({url -> procon#_sh('make', '-C', cwd, 'submit', 'URL=' . url)})
-  \.catch({mes -> execute('echomsg mes', '')})
+  \.catch({mes -> s:echomsg('err', mes)})
+endfunction
+
+function! s:echomsg(mode, msg) abort
+  if a:mode ==# 'err' && g:procon_debug
+    echohl WarningMsg
+  endif
+  echomsg a:msg
+  echohl None
 endfunction
 
 function! s:read(chan, part) abort

@@ -80,6 +80,16 @@ function! procon#submit(...) abort
   \.catch({mes -> s:echomsg('err', mes)})
 endfunction
 
+function! procon#addtest() abort
+  let test_dir = expand('%:p:h') . '/test/'
+  if !isdirectory(test_dir)
+    return
+  endif
+  let test_name = test_dir . reltimestr(reltime())
+  execute 'botright 10split' test_name . '.out'
+  execute 'leftabove vsplit' test_name . '.in'
+endfunction
+
 function! s:echomsg(mode, msg) abort
   if a:mode ==# 'err' && g:procon_debug
     echohl WarningMsg

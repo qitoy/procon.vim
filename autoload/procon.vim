@@ -93,9 +93,11 @@ endfunction
 function! s:echomsg(mode, msg) abort
   if a:mode ==# 'err' && g:procon_debug
     echohl WarningMsg
+    echomsg a:msg
+    echohl None
+  elseif a:mode ==# 'msg'
+    echomsg a:msg
   endif
-  echomsg a:msg
-  echohl None
 endfunction
 
 function! s:read(chan, part) abort

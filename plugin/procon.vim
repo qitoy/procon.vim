@@ -1,6 +1,6 @@
 augroup procon
   autocmd!
-  autocmd BufEnter * call procon#download()
+  autocmd BufEnter * Procon download
 augroup END
 
 command! -nargs=? ProconDownload
